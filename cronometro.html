@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cronômetro com Timer</title>
+  <style>
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 15px;
+    }
+
+    #timer {
+      font-size: 4em;
+      margin-bottom: 20px;
+    }
+
+    .buttons button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .start { background: #0f0; }
+    .pause { background: #f90; }
+    .reset { background: #f00; color: white; }
+    .countdown { background: #00f; color: white; }
+
+    .start:hover { background: #0c0; }
+    .pause:hover { background: #e68a00; }
+    .reset:hover { background: #c00; }
+    .countdown:hover { background: #0077cc; }
+
+    .input-box {
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 60px;
+      padding: 5px;
+      text-align: center;
+      font-size: 1em;
+      margin: 0 5px;
+      border-radius: 4px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cronômetro + Timer</h1>
+
+  <div class="input-box">
+    <input type="number" id="inputHor" placeholder="hor" min="0" max="23">
+    <input type="number" id="inputMin" placeholder="min" min="0" max="59">
+    <input type="number" id="inputSeg" placeholder="seg" min="0" max="59">
+    
+  </div>
+
+  <div id="timer">00:00:00</div>
+
+  <div class="buttons">
+    <button class="start" onclick="start()">Iniciar</button>
+    <button class="pause" onclick="pause()">Pausar</button>
+    <button class="reset" onclick="reset()">Resetar</button>
+    <button class="countdown" onclick="startCountdown()">Modo Regressivo</button>
+  </div>
+
+  <script>
+    let segundos = 0;
+    let minutos = 0;
+    let horas = 0;
+    let intervalo = null;
+    let rodando = false;
+    let modoContagemRegressiva = false;
+
+    function formatarTempo(valor) {
+      return valor < 10 ? '0' + valor : valor;
+    }
+
+    function atualizarDisplay() {
+      document.getElementById('timer').innerText = 
+        `${formatarTempo(horas)}:${formatarTempo(minutos)}:${formatarTempo(segundos)}`;
+    }
+
+    function start() {
+      if (!rodando) {
+        rodando = true;
+        modoContagemRegressiva = false;
+        intervalo = setInterval(() => {
+          segundos++;
+          if (segundos === 60) {
+            segundos = 0;
+            minutos++;
+            if (minutos === 60) {
+              minutos = 0;
+              horas++;
+              if (horas === 24) {
+                horas = 0;
+              }
+            }
+          }
+          atualizarDisplay();
+        }, 1000);
+      }
+    }
+
+    function pause() {
+      clearInterval(intervalo);
+      rodando = false;
+    }
+
+    function reset() {
+      clearInterval(intervalo);
+      segundos = 0;
+      minutos = 0;
+      horas = 0;
+      rodando = false;
+      atualizarDisplay();
+    }
+
+    function startCountdown() {
+        const inputHor = parseInt(document.getElementById('inputHor').value) || 0;
+      const inputMin = parseInt(document.getElementById('inputMin').value) || 0;
+      const inputSeg = parseInt(document.getElementById('inputSeg').value) || 0;
+      
+      horas = inputHor;
+      minutos = inputMin;
+      segundos = inputSeg;
+
+      atualizarDisplay();
+
+      if (!rodando) {
+        rodando = true;
+        modoContagemRegressiva = true;
+
+        intervalo = setInterval(() => {
+          if (segundos === 0 && minutos === 0 && horas === 0) {
+            clearInterval(intervalo);
+            rodando = false;
+            alert("Tempo esgotado!");
+            return;
+          }
+
+          if (segundos === 0) {
+            if (minutos === 0) {
+              if (horas > 0) {
+                horas--;
+                minutos = 59;
+                segundos = 59;
+              }
+            } else {
+              minutos--;
+              segundos = 59;
+            }
+          } else {
+            segundos--;
+          }
+
+          atualizarDisplay();
+        }, 1000);
+      }
+    }
+
+    atualizarDisplay(); // inicializa com 00:00:00
+  </script>
+</body>
+</html>
